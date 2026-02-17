@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/saho/udptun/internal/server"
+	"github.com/sahobur/udptun/internal/server"
 )
 
 var localPort string
