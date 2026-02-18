@@ -4,14 +4,20 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
+	"log/slog"
+	"os"
+	"strings"
 
-	"github.com/spf13/cobra"
 	"github.com/sahobur/udptun/internal/server"
+	"github.com/sahobur/udptun/internal/tunnel"
+	"github.com/spf13/cobra"
 )
 
-var localPort string
-var localTunAddr string
+var localPort int
+var listenAddr string
+var tunnelAddr string
+
+const clientKey = "pingpingping"
 
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
@@ -19,17 +25,38 @@ var serveCmd = &cobra.Command{
 	Short: "run tunnel server",
 	Long:  `ip tunnel server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		server.startServer(localPort, localTunAddr)
-		
+		server := server.NewServer(listenAddr, localPort, tunnelAddr)
+		if err := server.StartServer(); err != nil {
+			slog.Error("server sart", slog.String("error", err.Error()))
+			os.Exit(1)
+		}
+		// todo receive udp packets for handshake and create tunnel
+		packet := make([]byte, 1500)
+		for {
+			p, remoteAddr, err := server.Conn.ReadFromUDP(packet)
+			if err != nil {
+				slog.Error("read from", slog.String("error", err.Error()))
+				continue
+			}
+			slog.Info("received packet", slog.Int("length", p), slog.String("remoteAddr", remoteAddr.String()))
+			if strings.Trim(string(packet[:p]), "\n") == clientKey {
+				slog.Info("client connected", slog.String("remoteAddr", remoteAddr.String()))
+				t := tunnel.NewUDPTunnel(remoteAddr.String(), localPort, server.Conn, remoteAddr, tunnelAddr, server.TunIf)
+				go func() {
+					t.Send()
+				}()
+				t.Recv()
+			}
+		}
 	},
 }
 
-
 func init() {
 	rootCmd.AddCommand(serveCmd)
-	serveCmd.Flags().StringVarP(&localPort, "local-port", "p", "", "Local port")
-	serveCmd.Flags().StringVarP(&localTunAddr, "local-tun-addr", "l", "", "Local tunnel address")
+	serveCmd.Flags().IntVarP(&localPort, "local-port", "p", 8888, "Local port")
+	serveCmd.Flags().StringVarP(&listenAddr, "listen-addr", "l", "0.0.0.0", "Local tunnel address")
+	serveCmd.Flags().StringVarP(&tunnelAddr, "tunnel-addr", "t", "10.130.0.1/24", "Tunnel address")
 	serveCmd.MarkFlagRequired("local-port")
-	serveCmd.MarkFlagRequired("local-tun-addr")
-
+	serveCmd.MarkFlagRequired("listen-addr")
+	serveCmd.MarkFlagRequired("tunnel-addr")
 }

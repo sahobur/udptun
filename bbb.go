@@ -64,15 +64,7 @@ func main1() {
 
 }
 
-func serverUDP(localPort int) (*net.UDPConn, error) {
 
-	addr := &net.UDPAddr{IP: net.IPv4(0, 0, 0, 0), Port: localPort}
-	conn, err := net.ListenUDP("udp", addr)
-	if err != nil {
-		return nil, fmt.Errorf("не удалось запустить UDP-сервер: %w", err)
-	}
-	return conn, nil
-}
 
 func sendUDPPacket(ifce *water.Interface, conn *net.UDPConn, remoteAddr string, msg string) error {
 	remoteUDPAddr, err := net.ResolveUDPAddr("udp", remoteAddr)
@@ -113,49 +105,4 @@ func receiveUDPPacket(ifce *water.Interface, conn *net.UDPConn, remoteAddr strin
 	return nil
 }
 
-func createTunInterface(ip string) (*water.Interface, error) {
-	config := water.Config{
-		DeviceType: water.TUN,
-	}
 
-	// Создание интерфейса
-	ifce, err := water.New(config)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("Интерфейс создан: %s\n", ifce.Name())
-
-	setupInterface(ifce.Name(), ip+"/30")
-
-	return ifce, nil
-}
-
-func setupInterface(name string, ip string) {
-	exec.Command("ip", "addr", "add", ip, "dev", name).Run()
-	exec.Command("ip", "link", "set", "dev", name, "up").Run()
-}
-func setupRoute(remoteIP string) {
-	if err := exec.Command("ip", "route", "add", remoteIP, "via", "tun0").Run(); err != nil {
-		log.Fatal(err)
-	}
-
-	if getDefaultRoute() != "" {
-		if err := exec.Command("ip", "route", "add", "default", "via", getDefaultRoute()).Run(); err != nil {
-			log.Fatal(err)
-		}
-	}
-}
-
-func getDefaultRoute() string {
-	routes, err := netlink.RouteList(nil, netlink.FAMILY_V4)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, route := range routes {
-		if route.Gw != nil {
-			return route.Gw.String()
-		}
-	}
-	return ""
-}

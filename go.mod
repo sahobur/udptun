@@ -1,8 +1,9 @@
 module github.com/sahobur/udptun
 
-go 1.25.5
+go 1.26.0
 
 require (
+	github.com/lmittmann/tint v1.1.3
 	github.com/pion/stun v0.6.1
 	github.com/songgao/water v0.0.0-20200317203138-2b4b6d7c09d8
 	github.com/spf13/cobra v1.10.2
