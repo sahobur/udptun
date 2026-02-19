@@ -41,7 +41,7 @@ var serveCmd = &cobra.Command{
 			slog.Info("received packet", slog.Int("length", p), slog.String("remoteAddr", remoteAddr.String()))
 			if strings.Trim(string(packet[:p]), "\n") == clientKey {
 				slog.Info("client connected", slog.String("remoteAddr", remoteAddr.String()))
-				t := tunnel.NewUDPTunnel(remoteAddr.String(), localPort, server.Conn, remoteAddr, tunnelAddr, server.TunIf)
+				t := tunnel.NewUDPTunnel(localPort, server.Conn, remoteAddr, tunnelAddr, server.TunIf)
 				go func() {
 					t.Send()
 				}()
@@ -53,9 +53,9 @@ var serveCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
-	serveCmd.Flags().IntVarP(&localPort, "local-port", "p", 8888, "Local port")
+	serveCmd.Flags().IntVarP(&localPort, "local-port", "p", 9999, "Local port")
 	serveCmd.Flags().StringVarP(&listenAddr, "listen-addr", "l", "0.0.0.0", "Local tunnel address")
-	serveCmd.Flags().StringVarP(&tunnelAddr, "tunnel-addr", "t", "10.130.0.1/24", "Tunnel address")
+	serveCmd.Flags().StringVarP(&tunnelAddr, "tunnel-addr", "t", "10.30.1.1/24", "Tunnel address")
 	serveCmd.MarkFlagRequired("local-port")
 	serveCmd.MarkFlagRequired("listen-addr")
 	serveCmd.MarkFlagRequired("tunnel-addr")

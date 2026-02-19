@@ -1,7 +1,6 @@
 package tunnel
 
 import (
-	"fmt"
 	"log/slog"
 	"net"
 
@@ -9,7 +8,6 @@ import (
 )
 
 type UDPTunnel struct {
-	remoteIP      string
 	localPort     int
 	conn          *net.UDPConn
 	localTunnelIP string
@@ -17,11 +15,10 @@ type UDPTunnel struct {
 	RemoteAddress *net.UDPAddr
 }
 
-func NewUDPTunnel(remoteIP string, localPort int, conn *net.UDPConn, remoteAddress *net.UDPAddr,
+func NewUDPTunnel(localPort int, conn *net.UDPConn, remoteAddress *net.UDPAddr,
 	localTunnelIP string, ifce *water.Interface) UDPTunnel {
 	//todo validate
 	return UDPTunnel{
-		remoteIP:      remoteIP,
 		localPort:     localPort,
 		conn:          conn,
 		localTunnelIP: localTunnelIP,
@@ -30,27 +27,41 @@ func NewUDPTunnel(remoteIP string, localPort int, conn *net.UDPConn, remoteAddre
 	}
 }
 
-func (t *UDPTunnel) Send() {
+func (t UDPTunnel) Send() {
 	packet := make([]byte, 2000)
 	for {
 		_, err := t.ifce.Read(packet)
 		if err != nil {
-			slog.Error("read from", slog.String("error", err.Error()))
+			slog.Error("read from tunnel",
+				slog.String("interface", t.ifce.Name()),
+				slog.String("error", err.Error()))
 		}
-		fmt.Println("read from", packet)
-		//_, err = t.conn.WriteTo(data, t.RemoteAddress)
+		_, err = t.conn.WriteTo(packet, t.RemoteAddress)
+		if err != nil {
+			slog.Error("write to udp connection",
+				slog.String("connection", t.conn.RemoteAddr().String()),
+				slog.String("error", err.Error()))
+		}
 	}
 }
 
-func (t *UDPTunnel) Recv() {
-	data := make([]byte, 2000)
+func (t UDPTunnel) Recv() {
+	packet := make([]byte, 2000)
 	for {
-		n, remoteAddr, err := t.conn.ReadFromUDP(data)
+		n, _, err := t.conn.ReadFromUDP(packet)
 		if err != nil {
-			slog.Error("read from", slog.String("error", err.Error()))
+			slog.Error("read from",
+				slog.String("udp connection", t.conn.RemoteAddr().String()),
+				slog.String("error", err.Error()))
 			return
 		}
 
-		fmt.Printf("recv packet from %s:\n%v\n", remoteAddr.String(), data[:n]) // which client?
+		n, err = t.ifce.Write(packet[:n])
+		if err != nil {
+			slog.Error("write to interface",
+				slog.String("interface", t.ifce.Name()),
+				slog.String("error", err.Error()))
+			continue
+		}
 	}
 }
