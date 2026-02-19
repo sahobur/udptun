@@ -1,5 +1,5 @@
 /*
-Copyright © 2026 NAME HERE <EMAIL ADDRESS>
+Copyright © 2026 Alexandr Lykshitov 278999@mail.ru
 */
 package cmd
 
