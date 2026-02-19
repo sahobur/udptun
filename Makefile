@@ -13,3 +13,6 @@ deploy:
 	scp bin/udptun root@109.207.171.14:/home/saho/udptun
 
 
+docker-build:
+	@echo "Building udptun in docker. This may take a while... Binary will be in ./bin/"
+	docker build --output type=local,dest=./bin .
