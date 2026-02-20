@@ -66,16 +66,33 @@ func (s *Server) createTunInterface() (*water.Interface, error) {
 	if err != nil {
 		panic(err)
 	}
+
 	s.TunIf = ifce
 	slog.Info("TUN interface created", "name", ifce.Name())
-	setupInterface(ifce.Name(), s.TunAddr)
+
+	if err = setupInterface(ifce.Name(), s.TunAddr); err != nil {
+		return nil, err
+	}
 
 	return ifce, nil
 }
 
-func setupInterface(name string, ip string) {
-	exec.Command("ip", "addr", "add", ip, "dev", name).Run()
-	exec.Command("ip", "link", "set", "dev", name, "up").Run()
+func setupInterface(name string, ipNet string) error {
+	link, err := netlink.LinkByName(name)
+	if err != nil {
+		return fmt.Errorf("setupInterface: %v", err)
+	}
+
+	addr, err := netlink.ParseAddr(ipNet)
+	if err != nil {
+		return fmt.Errorf("setupInterface: %v", err)
+	}
+
+	if err := netlink.AddrAdd(link, addr); err != nil {
+		return fmt.Errorf("setupInterface: %v", err)
+	}
+
+	return nil
 }
 
 func setupRoute(remoteIP string) {
