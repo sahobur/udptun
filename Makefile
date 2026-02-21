@@ -3,7 +3,7 @@ build:
 
 run-server:
 	go build -o bin/udptun main.go
-	sudo ./bin/udptun serve -p 9999 -l 0.0.0.0 -t 10.30.1.1/24
+	sudo ./bin/udptun serve 
 
 run-client:
 	go build -o bin/udptun main.go

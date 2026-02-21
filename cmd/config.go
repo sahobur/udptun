@@ -24,12 +24,14 @@ type Client struct {
 	IP   string `mapstructure:"ip"`
 }
 
+// todo vaidate
 func (c *Config) Load() error {
 	v := eviper.New(viper.New())
-	v.AddConfigPath("./config")
 	v.AddConfigPath("/etc/udptun")
 	v.AddConfigPath("../")
-	v.AddConfigPath("./")
+	v.AddConfigPath("../../")
+	v.AddConfigPath(".")
+
 	v.SetConfigType("yaml")
 	v.SetConfigFile("config.yaml")
 	v.AutomaticEnv()

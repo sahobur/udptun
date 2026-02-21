@@ -25,7 +25,7 @@ var serveCmd = &cobra.Command{
 	Short: "run tunnel server",
 	Long:  `ip tunnel server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		server := server.NewServer(listenAddr, localPort, tunnelAddr)
+		server := server.NewServer(cfg.Listen, cfg.Port, cfg.TunAddr)
 		if err := server.StartServer(); err != nil {
 			slog.Error("server sart", slog.String("error", err.Error()))
 			os.Exit(1)
@@ -53,10 +53,7 @@ var serveCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
-	serveCmd.Flags().IntVarP(&localPort, "local-port", "p", 9999, "Local port")
-	serveCmd.Flags().StringVarP(&listenAddr, "listen-addr", "l", "0.0.0.0", "Local tunnel address")
-	serveCmd.Flags().StringVarP(&tunnelAddr, "tunnel-addr", "t", "10.30.1.1/24", "Tunnel address")
-	serveCmd.MarkFlagRequired("local-port")
-	serveCmd.MarkFlagRequired("listen-addr")
-	serveCmd.MarkFlagRequired("tunnel-addr")
+	serveCmd.Flags().IntVarP(&cfg.Port, "local-port", "p", 9999, "Local port")
+	serveCmd.Flags().StringVarP(&cfg.Listen, "listen-addr", "l", "0.0.0.0", "Local tunnel address")
+	serveCmd.Flags().StringVarP(&cfg.TunAddr, "tunnel-addr", "t", "10.30.1.1/24", "Tunnel address")
 }
