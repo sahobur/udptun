@@ -10,7 +10,7 @@ import (
 
 func SetupInterface(name, localIP string) error {
 	// macOS требует: ifconfig <name> <local> <remote> up
-	cmd := exec.Command("ifconfig", name, localIP, "up")
+	cmd := exec.Command("ifconfig", name, localIP, "10.30.1.1", "up")
 	if err := cmd.Run(); err != nil {
 		return err
 	}

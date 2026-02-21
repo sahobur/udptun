@@ -26,7 +26,7 @@ var clientCmd = &cobra.Command{
 		slog.Info("client start")
 		server := server.NewServer("0.0.0.0", localPort, tunnelAddr, cfg.Clients)
 		if err := server.StartServer(); err != nil {
-			slog.Error("server sart", slog.String("error", err.Error()))
+			slog.Error("server start", slog.String("error", err.Error()))
 			os.Exit(1)
 		}
 

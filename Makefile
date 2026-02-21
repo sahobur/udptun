@@ -18,7 +18,7 @@ run-server:
 	go build -o bin/udptun main.go
 	sudo ./bin/udptun serve 
 
-run-client:
+run-client-1:
 	go build -o bin/udptun main.go
 	sudo ./bin/udptun client -r $(SERVER)  -p 9999 -s 8888 -t 10.30.1.2/24 -k $(CLKEY)
 
