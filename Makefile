@@ -1,5 +1,6 @@
 SERVER = 109.207.171.14
 CLKEY = key-abcd12347890
+CLKEY2 = key-ddaa2026ffe
 .DEFAULT_GOAL := build
 
 build:
@@ -21,6 +22,11 @@ run-server:
 run-client-1:
 	go build -o bin/udptun main.go
 	sudo ./bin/udptun client -r $(SERVER)  -p 9999 -s 8888 -t 10.30.1.2/24 -k $(CLKEY)
+
+
+run-client-2:
+	go build -o bin/udptun main.go
+	sudo ./bin/udptun client -r $(SERVER)  -p 9999 -s 7777 -t 10.30.1.3/24 -k $(CLKEY2)
 
 deploy:
 	scp bin/udptun root@$(SERVER):/home/saho/udptun
