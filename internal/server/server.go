@@ -6,7 +6,11 @@ import (
 	"log/slog"
 	"net"
 	"os/exec"
+	"strings"
 
+	"github.com/sahobur/udptun/internal/model"
+
+	//"github.com/sahobur/udptun/cmd"
 	"github.com/songgao/water"
 	"github.com/vishvananda/netlink"
 )
@@ -19,14 +23,16 @@ type Server struct {
 	TunIf   *water.Interface
 	TunAddr string
 	Conn    *net.UDPConn
+	Clients []model.Client
 }
 
-func NewServer(ip string, port int, locTunAddr string) *Server {
+func NewServer(ip string, port int, locTunAddr string, cl []model.Client) *Server {
 	slog.Info("Creating server", "ip", ip, "port", port, "tunAddr", locTunAddr)
 	return &Server{
 		Listen:  net.ParseIP(ip),
 		Port:    port,
 		TunAddr: locTunAddr,
+		Clients: cl,
 	}
 }
 
@@ -120,6 +126,16 @@ func getDefaultRoute() string {
 	return ""
 }
 
-func (s *Server) authUserConn() {
+func (s *Server) AuthUserConn(packet []byte, n int) model.Client {
+	key := strings.Trim(string(packet[:n]), "\n")
+	return s.clientKeyExist(key)
+}
 
+func (s *Server) clientKeyExist(key string) model.Client {
+	for _, v := range s.Clients {
+		if v.Key == key {
+			return v
+		}
+	}
+	return model.Client{}
 }

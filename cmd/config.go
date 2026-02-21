@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/Russiancold/eviper"
 	"github.com/go-viper/mapstructure/v2"
+	"github.com/sahobur/udptun/internal/model"
 	"github.com/spf13/viper"
 )
 
@@ -13,15 +14,9 @@ type Config struct {
 	Listen  string
 	TunAddr string `mapstructure:"tun_addr"`
 	//Clients map[preauthKey]Client
-	ServerKey string   `mapstructure:"server_key"`
-	CfgFile   string   `mapstructure:"config_file"`
-	Clients   []Client `mapstructure:"clients"`
-}
-
-type Client struct {
-	Name string `mapstructure:"name"`
-	Key  string `mapstructure:"key"`
-	IP   string `mapstructure:"ip"`
+	ServerKey string         `mapstructure:"server_key"`
+	CfgFile   string         `mapstructure:"config_file"`
+	Clients   []model.Client `mapstructure:"clients"`
 }
 
 // todo vaidate
@@ -33,7 +28,7 @@ func (c *Config) Load() error {
 	v.AddConfigPath(".")
 
 	v.SetConfigType("yaml")
-	v.SetConfigFile("config.yaml")
+	v.SetConfigName("config")
 	v.AutomaticEnv()
 	err := v.Unmarshal(c)
 	if err != nil {
@@ -56,7 +51,7 @@ func (c *Config) Save() error {
 	return viper.WriteConfigAs(c.CfgFile)
 }
 
-func (c *Config) AddClient(client Client) error {
+func (c *Config) AddClient(client model.Client) error {
 	c.Clients = append(c.Clients, client)
 	return c.Save()
 }

@@ -4,6 +4,7 @@ go 1.26.0
 
 require (
 	github.com/Russiancold/eviper v1.0.1
+	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/lmittmann/tint v1.1.3
 	github.com/pion/stun v0.6.1
 	github.com/songgao/water v0.0.0-20200317203138-2b4b6d7c09d8
@@ -16,7 +17,6 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
-	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pion/dtls/v2 v2.2.7 // indirect

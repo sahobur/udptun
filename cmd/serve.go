@@ -6,7 +6,6 @@ package cmd
 import (
 	"log/slog"
 	"os"
-	"strings"
 
 	"github.com/sahobur/udptun/internal/server"
 	"github.com/sahobur/udptun/internal/tunnel"
@@ -25,7 +24,7 @@ var serveCmd = &cobra.Command{
 	Short: "run tunnel server",
 	Long:  `ip tunnel server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		server := server.NewServer(cfg.Listen, cfg.Port, cfg.TunAddr)
+		server := server.NewServer(cfg.Listen, cfg.Port, cfg.TunAddr, cfg.Clients)
 		if err := server.StartServer(); err != nil {
 			slog.Error("server sart", slog.String("error", err.Error()))
 			os.Exit(1)
@@ -39,8 +38,11 @@ var serveCmd = &cobra.Command{
 				continue
 			}
 			slog.Info("received packet", slog.Int("length", p), slog.String("remoteAddr", remoteAddr.String()))
-			if strings.Trim(string(packet[:p]), "\n") == clientKey {
-				slog.Info("client connected", slog.String("remoteAddr", remoteAddr.String()))
+
+			client := server.AuthUserConn(packet, p)
+			if len(client.Key) != 0 {
+				slog.Info("connection accepted", slog.String("client name:", client.Name),
+					slog.String("remoteAddr", remoteAddr.String()))
 				t := tunnel.NewUDPTunnel(localPort, server.Conn, remoteAddr, tunnelAddr, server.TunIf)
 				go func() {
 					t.Send()

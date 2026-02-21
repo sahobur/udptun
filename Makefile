@@ -1,6 +1,11 @@
 SERVER = 109.207.171.14
+.DEFAULT_GOAL := build
+
 build:
 	go build -o bin/udptun main.go
+
+vet:
+	go vet ./...
 
 run-server:
 	go build -o bin/udptun main.go

@@ -23,7 +23,7 @@ var clientCmd = &cobra.Command{
 	Long:  `client`,
 	Run: func(cmd *cobra.Command, args []string) {
 		slog.Info("client start")
-		server := server.NewServer("0.0.0.0", localPort, tunnelAddr)
+		server := server.NewServer("0.0.0.0", localPort, tunnelAddr, cfg.Clients)
 		if err := server.StartServer(); err != nil {
 			slog.Error("server sart", slog.String("error", err.Error()))
 			os.Exit(1)
