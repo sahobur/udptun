@@ -42,16 +42,17 @@ var serveCmd = &cobra.Command{
 				continue
 			}
 			slog.Info("received packet", slog.Int("length", p), slog.String("remoteAddr", remoteAddr.String()))
-
 			client := server.AuthUserConn(packet, p)
 			if len(client.Key) != 0 {
-				slog.Info("connection accepted", slog.String("client name:", client.Name),
-					slog.String("remoteAddr", remoteAddr.String()))
-				t := tunnel.NewUDPTunnel(localPort, server.Conn, remoteAddr, tunnelAddr, server.TunIf)
 				go func() {
-					t.Send()
+					slog.Info("connection accepted", slog.String("client name:", client.Name),
+						slog.String("remoteAddr", remoteAddr.String()))
+					t := tunnel.NewUDPTunnel(localPort, server.Conn, remoteAddr, tunnelAddr, server.TunIf)
+					go func() {
+						t.Send()
+					}()
+					t.Recv()
 				}()
-				t.Recv()
 			}
 		}
 	},
