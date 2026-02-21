@@ -2,17 +2,17 @@ package server
 
 import (
 	"fmt"
-	"log"
+
 	"log/slog"
 	"net"
-	"os/exec"
+
 	"strings"
 
 	"github.com/sahobur/udptun/internal/model"
+	"github.com/sahobur/udptun/internal/tunnel"
 
 	//"github.com/sahobur/udptun/cmd"
 	"github.com/songgao/water"
-	"github.com/vishvananda/netlink"
 )
 
 type clientID string
@@ -76,58 +76,11 @@ func (s *Server) createTunInterface() (*water.Interface, error) {
 	s.TunIf = ifce
 	slog.Info("TUN interface created", "name", ifce.Name())
 
-	if err = setupInterface(ifce.Name(), s.TunAddr); err != nil {
+	if err = tunnel.SetupInterface(ifce.Name(), s.TunAddr); err != nil {
 		return nil, err
 	}
 
 	return ifce, nil
-}
-
-func setupInterface(name string, ipNet string) error {
-	link, err := netlink.LinkByName(name)
-	if err != nil {
-		return fmt.Errorf("setupInterface: %v", err)
-	}
-
-	addr, err := netlink.ParseAddr(ipNet)
-	if err != nil {
-		return fmt.Errorf("setupInterface: %v", err)
-	}
-
-	if err := netlink.AddrAdd(link, addr); err != nil {
-		return fmt.Errorf("setupInterface: %v", err)
-	}
-
-	if err := netlink.LinkSetUp(link); err != nil {
-		return fmt.Errorf("setupInterface: %v", err)
-	}
-
-	return nil
-}
-
-func setupRoute(remoteIP string) {
-	if err := exec.Command("ip", "route", "add", remoteIP, "via", "tun0").Run(); err != nil {
-		log.Fatal(err)
-	}
-
-	if getDefaultRoute() != "" {
-		if err := exec.Command("ip", "route", "add", "default", "via", getDefaultRoute()).Run(); err != nil {
-			log.Fatal(err)
-		}
-	}
-}
-
-func getDefaultRoute() string {
-	routes, err := netlink.RouteList(nil, netlink.FAMILY_V4)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, route := range routes {
-		if route.Gw != nil {
-			return route.Gw.String()
-		}
-	}
-	return ""
 }
 
 func (s *Server) AuthUserConn(packet []byte, n int) model.Client {

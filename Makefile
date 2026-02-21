@@ -5,6 +5,12 @@ CLKEY = key-abcd12347890
 build:
 	go build -o bin/udptun main.go
 
+build-darwin:
+	GOOS=darwin go build -o bin/udptun main.go
+
+build-linux:
+	GOOS=linux go build -o bin/udptun main.go
+
 vet:
 	go vet ./...
 
