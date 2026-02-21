@@ -2,7 +2,10 @@
 
 package tunnel
 
-import "os/exec"
+import (
+	"net"
+	"os/exec"
+)
 
 import (
 	"log"
@@ -10,7 +13,12 @@ import (
 
 func SetupInterface(name, localIP string) error {
 	// macOS требует: ifconfig <name> <local> <remote> up
-	cmd := exec.Command("ifconfig", name, localIP, "10.30.1.2", "up")
+	ip, _, err := net.ParseCIDR(localIP)
+	if err != nil {
+		return err
+	}
+	ips := ip.String()
+	cmd := exec.Command("ifconfig", name, localIP, ips, "up")
 	if err := cmd.Run(); err != nil {
 		return err
 	}
