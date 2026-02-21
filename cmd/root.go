@@ -24,7 +24,7 @@ func Execute() {
 	w := os.Stderr
 	slog.SetDefault(slog.New(
 		tint.NewHandler(w, &tint.Options{
-			Level:      slog.LevelDebug,
+			Level:      slog.LevelInfo,
 			TimeFormat: time.TimeOnly,
 			AddSource:  true,
 		}),

@@ -98,6 +98,10 @@ func setupInterface(name string, ipNet string) error {
 		return fmt.Errorf("setupInterface: %v", err)
 	}
 
+	if err := netlink.LinkSetUp(link); err != nil {
+		return fmt.Errorf("setupInterface: %v", err)
+	}
+
 	return nil
 }
 

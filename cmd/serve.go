@@ -6,6 +6,7 @@ package cmd
 import (
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/sahobur/udptun/internal/server"
 	"github.com/sahobur/udptun/internal/tunnel"
@@ -16,19 +17,22 @@ var localPort int
 var listenAddr string
 var tunnelAddr string
 
-const clientKey = "pingpingping"
-
 // serveCmd represents the serve command
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "run tunnel server",
 	Long:  `ip tunnel server`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if strings.EqualFold(os.Getenv("DEBUG"), "true") {
+			slog.SetLogLoggerLevel(slog.LevelDebug)
+		}
+
 		server := server.NewServer(cfg.Listen, cfg.Port, cfg.TunAddr, cfg.Clients)
 		if err := server.StartServer(); err != nil {
 			slog.Error("server sart", slog.String("error", err.Error()))
 			os.Exit(1)
 		}
+		slog.Debug("server config", slog.Any("cfg", cfg))
 		// todo receive udp packets for handshake and create tunnel
 		packet := make([]byte, 1500)
 		for {

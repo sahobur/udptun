@@ -15,6 +15,7 @@ import (
 
 var remoteAddr string
 var remotePort int
+var clientKey string
 
 // clientCmd represents the client command
 var clientCmd = &cobra.Command{
@@ -52,6 +53,7 @@ func init() {
 	clientCmd.Flags().IntVarP(&localPort, "local-port", "s", 8888, "Local port")
 	clientCmd.Flags().IntVarP(&remotePort, "remote-port", "p", 9999, "remote port")
 	clientCmd.Flags().StringVarP(&tunnelAddr, "tunnel-addr", "t", "10.30.1.2/24", "Tunnel address")
+	clientCmd.Flags().StringVarP(&clientKey, "client-key", "k", "key", "preauth key")
 	clientCmd.MarkFlagRequired("remote-addr")
 	clientCmd.MarkFlagRequired("tunnel-addr")
 }
