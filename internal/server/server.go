@@ -24,8 +24,6 @@ func isAlphanumericRegexp(s string) bool {
 	return alphanumeric.MatchString(s)
 }
 
-type clientID string
-
 type Server struct {
 	Port    int
 	Listen  net.IP

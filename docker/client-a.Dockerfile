@@ -5,6 +5,6 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o udptun ./main.go
 
-FROM scratch AS export-stage
+FROM scratch 
 COPY --from=builder /app/udptun /
 
