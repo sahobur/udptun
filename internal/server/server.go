@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 
 	"log/slog"
@@ -12,8 +13,16 @@ import (
 	"github.com/sahobur/udptun/internal/tunnel"
 
 	//"github.com/sahobur/udptun/cmd"
+	"regexp"
+
 	"github.com/songgao/water"
 )
+
+var alphanumeric = regexp.MustCompile(`^[a-zA-Z0-9]+$`)
+
+func isAlphanumericRegexp(s string) bool {
+	return alphanumeric.MatchString(s)
+}
 
 type clientID string
 
@@ -83,16 +92,22 @@ func (s *Server) createTunInterface() (*water.Interface, error) {
 	return ifce, nil
 }
 
-func (s *Server) AuthUserConn(packet []byte, n int) model.Client {
+func (s *Server) AuthUserConn(packet []byte, n int) (model.Client, error) {
 	key := strings.Trim(string(packet[:n]), "\n")
+
+	if !isAlphanumericRegexp(key) {
+		return model.Client{}, errors.New("invalid key")
+	}
+
 	return s.clientKeyExist(key)
 }
 
-func (s *Server) clientKeyExist(key string) model.Client {
+func (s *Server) clientKeyExist(key string) (model.Client, error) {
 	for _, v := range s.Clients {
 		if v.Key == key {
-			return v
+			return v, nil
 		}
 	}
-	return model.Client{}
+
+	return model.Client{}, errors.New("client not found")
 }

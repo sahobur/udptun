@@ -1,0 +1,38 @@
+services:
+  server-vpn:
+    build:
+      context: ../
+      dockerfile: ./docker/server.Dockerfile
+    container_name: vpn-server
+    command: sleep infinity
+    networks:
+      shared_l3_net:
+        ipv4_address: 10.100.1.1
+
+  clinet-a:
+    image: busybox
+    container_name: clinet-a
+    command: sleep infinity
+    networks:
+      shared_l3_net:
+        ipv4_address: 172.16.222.2
+
+  clinet-b:
+    image: busybox
+    container_name: clinet-b
+    command: sleep infinity
+    networks:
+      shared_l3_net:
+        ipv4_address: 172.18.111.2
+networks:
+  shared_l3_net:
+    driver: ipvlan
+    driver_opts:
+      parent: enp42s0
+      ipvlan_mode: l3
+    ipam:
+      config:
+        - subnet: 10.100.1.0/24 # server-vpn
+        - subnet: 172.16.222.0/24 # clinet-a
+        - subnet: 172.18.111.0/24 # clinet-b
+
