@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/sahobur/udptun/internal/server"
 	"github.com/sahobur/udptun/internal/tunnel"
@@ -50,7 +51,10 @@ var serveCmd = &cobra.Command{
 				continue
 			}
 
-			slog.Info("received packet", slog.Int("length", p), slog.String("remoteAddr", remoteAddr.String()))
+			if p > 16 {
+				time.Sleep(1000000 * time.Millisecond) //data packets, no auth
+				continue
+			}
 
 			client, err := server.AuthUserConn(packet, p)
 			if err != nil {
