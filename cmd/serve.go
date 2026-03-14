@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var cfg Config
+
 var localPort int
 var listenAddr string
 var tunnelAddr string
@@ -25,6 +27,12 @@ var serveCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if strings.EqualFold(os.Getenv("DEBUG"), "true") {
 			slog.SetLogLoggerLevel(slog.LevelDebug)
+		}
+
+		err := cfg.Load()
+		if err != nil {
+			slog.Error(err.Error())
+			os.Exit(1)
 		}
 
 		server := server.NewServer(cfg.Listen, cfg.Port, cfg.TunAddr, cfg.Clients)

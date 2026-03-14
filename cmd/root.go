@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var cfg Config
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -30,13 +29,7 @@ func Execute() {
 		}),
 	))
 
-	err := cfg.Load()
-	if err != nil {
-		slog.Error(err.Error())
-		os.Exit(1)
-	}
-
-	err = rootCmd.Execute()
+	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}

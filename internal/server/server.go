@@ -92,7 +92,7 @@ func (s *Server) createTunInterface() (*water.Interface, error) {
 
 func (s *Server) AuthUserConn(packet []byte, n int) (model.Client, error) {
 	key := strings.Trim(string(packet[:n]), "\n")
-
+	slog.Info("Authenticating user connection", "key", key)
 	if !isAlphanumericRegexp(key) {
 		return model.Client{}, errors.New("invalid key")
 	}
